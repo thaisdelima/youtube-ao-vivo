@@ -1,0 +1,13 @@
+{
+  "name": "miopia-theme",
+  "displayName": "Miopia (leitura facilitada)",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": { "vscode": "^1.70.0" },
+  "categories": ["Themes"],
+  "contributes": {
+    "themes": [
+      { "label": "Miopia", "uiTheme": "vs-dark", "path": "./themes/miopia-color-theme.json" }
+    ]
+  }
+}

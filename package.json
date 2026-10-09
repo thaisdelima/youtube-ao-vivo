@@ -1,0 +1,19 @@
+{
+  "name": "youtube-ao-vivo",
+  "private": true,
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:web": "npm run dev -w web",
+    "build": "npm run build -w server && npm run build -w web"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true,
+    "esbuild@0.28.2": true,
+    "esbuild@0.21.5": true,
+    "fsevents@2.3.3": true
+  }
+}
