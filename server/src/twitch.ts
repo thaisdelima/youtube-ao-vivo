@@ -21,12 +21,12 @@ async function getToken(): Promise<string> {
   return token.value;
 }
 
-/** Streams ao vivo em português, ordenadas por espectadores. channelId = login (usado no embed). */
-export async function getTwitchStreams(pages = 1): Promise<LiveVideo[]> {
+/** Streams ao vivo no idioma indicado, ordenadas por espectadores. channelId = login (usado no embed). */
+export async function getTwitchStreams(pages = 1, language = "pt"): Promise<LiveVideo[]> {
   const out: LiveVideo[] = [];
   let cursor: string | undefined;
   for (let p = 0; p < pages; p++) {
-    const params = new URLSearchParams({ language: "pt", first: "100", type: "live" });
+    const params = new URLSearchParams({ language, first: "100", type: "live" });
     if (cursor) params.set("after", cursor);
     const res = await fetch(`https://api.twitch.tv/helix/streams?${params}`, {
       headers: { Authorization: `Bearer ${await getToken()}`, "Client-Id": process.env.TWITCH_CLIENT_ID! },

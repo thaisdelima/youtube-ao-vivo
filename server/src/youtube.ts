@@ -29,13 +29,13 @@ async function call(path: string, params: Record<string, string>, cost: number) 
 }
 
 /** search.list custa 100 unidades por página (até 50 resultados cada). */
-export async function searchLiveIds(opts: { categoryId?: string; query?: string; pages?: number }) {
+export async function searchLiveIds(opts: { categoryId?: string; query?: string; pages?: number; regionCode?: string; lang?: string }) {
   const params: Record<string, string> = {
     part: "id",
     type: "video",
     eventType: "live",
-    regionCode: "BR",
-    relevanceLanguage: "pt",
+    regionCode: opts.regionCode ?? "BR",
+    relevanceLanguage: opts.lang ?? "pt",
     maxResults: "50",
     order: "viewCount",
   };
@@ -68,6 +68,9 @@ export interface LiveVideo {
   viewers: number;
   isLive: boolean;
   platform?: "youtube" | "twitch";
+  categoryId?: string;
+  /** vídeo comum (sem liveStreamingDetails) */
+  isVod?: boolean;
 }
 
 /** videos.list custa 1 unidade por chamada (até 50 ids). */
@@ -90,9 +93,22 @@ export async function getVideos(ids: string[]): Promise<LiveVideo[]> {
         thumbnail: (t.maxres ?? t.high ?? t.medium ?? t.default).url,
         language: v.snippet.defaultAudioLanguage ?? v.snippet.defaultLanguage ?? null,
         viewers: Number(d?.concurrentViewers ?? 0),
-        isLive: !!d && !d.actualEndTime,
+        isLive: !!d && !!d.actualStartTime && !d.actualEndTime,
+        categoryId: v.snippet.categoryId,
+        isVod: !d,
       });
     }
   }
   return out;
+}
+
+/** Feed RSS do canal: não consome cota. Retorna ids dos vídeos recentes. */
+export async function fetchChannelFeed(channelId: string): Promise<string[]> {
+  const res = await fetch(
+    `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`,
+    { signal: AbortSignal.timeout(8000) }
+  );
+  if (!res.ok) throw new Error(`RSS ${res.status}`);
+  const xml = await res.text();
+  return [...xml.matchAll(/<yt:videoId>([\w-]{11})<\/yt:videoId>/g)].map((m) => m[1]);
 }
